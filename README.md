@@ -1,6 +1,6 @@
 # IP Inventory REST API
 
-A production-grade IP address inventory management API built with **C++20**, **Drogon**, and **PostgreSQL**.
+An IP address inventory management API built with **C++20**, **Drogon**, and **PostgreSQL** on Debian 13 OS
 
 ---
 
@@ -12,22 +12,21 @@ ip-inventory/
 ├── config/
 │   └── config.json              # Drogon + DB config
 ├── include/
+|   |── app
 │   ├── common/Types.h           # Shared types & response helpers
-│   ├── controllers/Controllers.h
-│   ├── db/DbClient.h
-│   ├── services/
-│   │   ├── IpInventoryService.h
-│   │   └── ReservationExpiryJob.h
+│   ├── controllers/*
+│   ├── repository/*
+│   ├── services/*
+│   │
 │   └── utils/
 │       ├── IpUtils.h
 │       └── JsonValidator.h
 ├── src/
 │   ├── main.cpp
+|   |── app
 │   ├── controllers/             # One .cpp per endpoint
-│   ├── services/
-│   │   ├── IpInventoryService.cpp
-│   │   └── ReservationExpiryJob.cpp
-│   ├── db/DbClient.cpp
+│   ├── repository/*
+│   ├── services/*
 │   └── utils/
 ├── sql/
 │   └── schema.sql               # PostgreSQL schema + indexes + views
@@ -42,25 +41,13 @@ ip-inventory/
 
 ---
 
-## Quick Start (Debian 12)
+## Quick Start (Debian 13)
 
 ### 1. Install dependencies and build
-
-```bash
-sudo bash scripts/install_and_build.sh
-```
 
 This installs all required packages and clones/builds Drogon from source.
 
 ### 2. Set up the database
-
-```bash
-# Defaults: DB=ip_inventory, USER=ipinv_user, PASS=changeme
-sudo bash scripts/setup_db.sh
-
-# Or override:
-DB_NAME=mydb DB_USER=myuser DB_PASS=secret sudo -E bash scripts/setup_db.sh
-```
 
 ### 3. Configure
 
@@ -68,13 +55,15 @@ Edit `config/config.json` — update the `db_clients` section with your PostgreS
 
 ```json
 {
-  "db_clients": [{
-    "host":   "127.0.0.1",
-    "port":   5432,
-    "dbname": "ip_inventory",
-    "user":   "ipinv_user",
-    "passwd": "changeme"
-  }],
+  "db_clients": [
+    {
+      "host": "127.0.0.1",
+      "port": 5432,
+      "dbname": "db_name_placeholder",
+      "user": "user_placeholder",
+      "passwd": "pass_placeholder"
+    }
+  ],
   "ip_inventory": {
     "reservation_timeout_seconds": 300,
     "expiry_check_interval_seconds": 30
@@ -85,7 +74,7 @@ Edit `config/config.json` — update the `db_clients` section with your PostgreS
 ### 4. Run
 
 ```bash
-./build/ip_inventory config/config.json
+./build/ip_inventory
 ```
 
 ### 5. Open the GUI
@@ -104,8 +93,8 @@ Add IP addresses to the inventory pool (status: **free**).
 ```json
 {
   "ipAddresses": [
-    { "ip": "95.44.73.19",                           "ipType": "IPv4" },
-    { "ip": "2a01:05a9:01a4:095c:0000:0000:0000:0001","ipType": "IPv6" }
+    { "ip": "95.44.73.19", "ipType": "IPv4" },
+    { "ip": "2a01:05a9:01a4:095c:0000:0000:0000:0001", "ipType": "IPv6" }
   ]
 }
 ```
@@ -138,7 +127,7 @@ Assign IPs to a service (free/reserved → assigned).
 ```json
 {
   "serviceId": "xxxyyy",
-  "ipAddresses": [ { "ip": "95.44.73.19" }, { "ip": "2a01:..." } ]
+  "ipAddresses": [{ "ip": "95.44.73.19" }, { "ip": "2a01:..." }]
 }
 ```
 
@@ -151,7 +140,7 @@ Release IPs from a service (assigned → free).
 ```json
 {
   "serviceId": "xxxyyy",
-  "ipAddresses": [ { "ip": "95.44.73.19" } ]
+  "ipAddresses": [{ "ip": "95.44.73.19" }]
 }
 ```
 
@@ -175,7 +164,7 @@ Returns all currently assigned IPs for the given service.
 {
   "ipAddresses": [
     { "ip": "95.44.73.19", "ipType": "IPv4" },
-    { "ip": "2a01:...",    "ipType": "IPv6" }
+    { "ip": "2a01:...", "ipType": "IPv6" }
   ]
 }
 ```
@@ -200,12 +189,6 @@ HTTP Request
  PostgreSQL (ip_pool table + audit log)
 ```
 
-### Concurrency
-
-- All DB operations are **fully async** — Drogon's event loop is never blocked.
-- Reservations use `SELECT … FOR UPDATE SKIP LOCKED` inside a transaction to prevent double-allocation under concurrent load.
-- The `ReservationExpiryJob` runs on Drogon's I/O loop using `runEvery()`.
-
 ### Audit Log
 
 Every state change (add, reserve, assign, terminate, release, service_change) is written to `ip_audit_log` with timestamp and JSONB details.
@@ -217,6 +200,7 @@ Every state change (add, reserve, assign, terminate, release, service_change) is
 The full OpenAPI 3.0 specification is at `swagger/openapi.yaml`.
 
 View it in Swagger UI:
+
 ```bash
 docker run -p 8081:8080 \
   -e SWAGGER_JSON=/api/openapi.yaml \
@@ -230,23 +214,23 @@ Then open http://localhost:8081
 
 ## Database Schema Overview
 
-| Table           | Purpose                                    |
-|-----------------|--------------------------------------------|
-| `ip_pool`       | Master inventory — one row per IP address  |
-| `ip_audit_log`  | Immutable log of every state transition    |
+| Table          | Purpose                                   |
+| -------------- | ----------------------------------------- |
+| `ip_pool`      | Master inventory — one row per IP address |
+| `ip_audit_log` | Immutable log of every state transition   |
 
-| View                  | Purpose                                |
-|-----------------------|----------------------------------------|
-| `v_ip_pool_summary`   | Count by status × ip_type              |
-| `v_reserved_ips`      | Active reservations with age in seconds|
+| View                | Purpose                                 |
+| ------------------- | --------------------------------------- |
+| `v_ip_pool_summary` | Count by status × ip_type               |
+| `v_reserved_ips`    | Active reservations with age in seconds |
 
 ---
 
 ## Configuration Reference
 
-| Key                                | Default | Description                                    |
-|------------------------------------|---------|------------------------------------------------|
-| `ip_inventory.reservation_timeout_seconds` | `300` | Seconds before a reservation auto-expires |
-| `ip_inventory.expiry_check_interval_seconds` | `30` | How often the expiry job runs          |
-| `app.threads_num`                  | `4`     | Drogon I/O threads                             |
-| `listeners[0].port`                | `8080`  | HTTP listen port                               |
+| Key                                          | Default | Description                               |
+| -------------------------------------------- | ------- | ----------------------------------------- |
+| `ip_inventory.reservation_timeout_seconds`   | `300`   | Seconds before a reservation auto-expires |
+| `ip_inventory.expiry_check_interval_seconds` | `30`    | How often the expiry job runs             |
+| `app.threads_num`                            | `4`     | Drogon I/O threads                        |
+| `listeners[0].port`                          | `8080`  | HTTP listen port                          |
