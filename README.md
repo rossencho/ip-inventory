@@ -1,6 +1,6 @@
 # IP Inventory REST API
 
-An IP address inventory management API built with **C++20**, **Drogon**, and **PostgreSQL** on Debian 13 OS
+An IP address inventory management API built with **C++20**, **Drogon framework**, and **PostgreSQL** on **Debian 13 OS**
 
 ---
 
