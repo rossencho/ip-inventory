@@ -1,0 +1,44 @@
+{
+    "listeners": [
+        {
+            "address": "0.0.0.0",
+            "port": 8080,
+            "https": false
+        }
+    ],
+    "app": {
+        "threads_num": 4,
+        "run_as_daemon": false,
+        "relaunch_on_error": false,
+        "use_sendfile": true,
+        "gzip": true,
+        "idle_connection_timeout": 60,
+        "document_root": "/home/ross/www/ip-inventory/gui",
+        "home_page": "index.html",
+        "log": {
+            "log_path": "",
+            "logfile_base_name": "ip_inventory",
+            "log_size_limit": 100000000,
+            "log_level": "INFO"
+        }
+    },
+    "db_clients": [
+        {
+            "name": "default",
+            "rdbms": "postgresql",
+            "host": "127.0.0.1",
+            "port": 5432,
+            "dbname": "data",
+            "user": "ross",
+            "passwd": "ross",
+            "is_fast": false,
+            "connection_number": 10
+        }
+    ],
+    "custom_config": {
+        "ip_inventory": {
+            "reservation_timeout_seconds": 300,
+            "expiry_check_interval_seconds": 30
+        }
+    }
+}

@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>IP Inventory — Control Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:       #0d0f14;
+  --surface:  #151820;
+  --card:     #1c2030;
+  --border:   #2a3048;
+  --accent:   #00e5ff;
+  --accent2:  #7c3aed;
+  --green:    #00e676;
+  --amber:    #ffab00;
+  --red:      #ff1744;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --mono:     'Space Mono', monospace;
+  --sans:     'IBM Plex Sans', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 14px; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  height: 56px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.logo {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+.logo span { color: var(--muted); }
+.status-pill {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  padding: 3px 10px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  letter-spacing: 0.08em;
+}
+.status-pill.connected { color: var(--green); border-color: var(--green); }
+
+/* ── LAYOUT ── */
+.layout { display: flex; flex: 1; }
+
+/* ── SIDEBAR ── */
+nav {
+  width: 220px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1.5rem 0;
+  flex-shrink: 0;
+}
+.nav-section {
+  padding: 0 1rem 1rem;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 0.25rem;
+}
+nav button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.6rem 1.25rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-family: var(--sans);
+  font-size: 0.85rem;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+nav button:hover { background: var(--card); color: var(--text); }
+nav button.active {
+  background: rgba(0, 229, 255, 0.06);
+  color: var(--accent);
+  border-left-color: var(--accent);
+}
+nav button .icon {
+  width: 16px;
+  height: 16px;
+  opacity: 0.7;
+  flex-shrink: 0;
+}
+nav button.active .icon { opacity: 1; }
+
+/* ── MAIN ── */
+main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 900px;
+}
+
+.panel { display: none; }
+.panel.active { display: block; }
+
+h2 {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 0.35rem;
+}
+.panel-desc {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-bottom: 1.75rem;
+  line-height: 1.5;
+}
+
+/* ── CARDS ── */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+.card-label {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+/* ── FORMS ── */
+.field { margin-bottom: 1rem; }
+label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+  font-family: var(--mono);
+  letter-spacing: 0.05em;
+}
+input[type="text"], select, textarea {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.82rem;
+  padding: 0.55rem 0.75rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+input[type="text"]:focus, select:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.15);
+}
+select { cursor: pointer; }
+textarea { resize: vertical; min-height: 80px; }
+
+/* IP row */
+.ip-rows { display: flex; flex-direction: column; gap: 0.5rem; }
+.ip-row {
+  display: grid;
+  grid-template-columns: 1fr 100px 32px;
+  gap: 0.5rem;
+  align-items: center;
+}
+.ip-row-simple {
+  display: grid;
+  grid-template-columns: 1fr 32px;
+  gap: 0.5rem;
+  align-items: center;
+}
+.btn-icon {
+  width: 32px; height: 32px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.btn-icon:hover { border-color: var(--red); color: var(--red); }
+.btn-add {
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  width: 100%;
+  margin-top: 0.5rem;
+  transition: all 0.15s;
+  letter-spacing: 0.06em;
+}
+.btn-add:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── SUBMIT BUTTON ── */
+.btn-submit {
+  background: var(--accent);
+  color: #000;
+  border: none;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.65rem 1.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-weight: 700;
+}
+.btn-submit:hover { background: #33eaff; }
+.btn-submit:active { transform: scale(0.98); }
+.btn-submit:disabled {
+  background: var(--border);
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+/* ── RESPONSE ── */
+.response-box {
+  margin-top: 1.25rem;
+  display: none;
+}
+.response-box.show { display: block; }
+.response-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+.response-status {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 2px;
+  letter-spacing: 0.06em;
+}
+.response-status.ok  { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid var(--green); }
+.response-status.err { background: rgba(255,23,68,0.1);  color: var(--red);   border: 1px solid var(--red); }
+pre.response-body {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 1rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+/* ── API CONFIG ── */
+.api-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--border);
+  padding: 0.65rem 1rem;
+  border-radius: 4px;
+  margin-bottom: 2rem;
+}
+.api-bar label { margin: 0; white-space: nowrap; }
+.api-bar input { flex: 1; }
+.btn-test {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  border-radius: 3px;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+.btn-test:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── POOL TABLE ── */
+.pool-table-wrap {
+  overflow-x: auto;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+}
+th {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+}
+td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid rgba(42,48,72,0.5);
+  color: var(--text);
+}
+tr:hover td { background: rgba(255,255,255,0.02); }
+.badge {
+  display: inline-block;
+  padding: 1px 7px;
+  border-radius: 2px;
+  font-size: 0.65rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.badge-free     { background: rgba(0,230,118,0.1); color: var(--green); }
+.badge-reserved { background: rgba(255,171,0,0.1); color: var(--amber); }
+.badge-assigned { background: rgba(0,229,255,0.1); color: var(--accent); }
+.badge-v4 { background: rgba(124,58,237,0.15); color: #a78bfa; }
+.badge-v6 { background: rgba(0,229,255,0.1);  color: var(--accent); }
+
+/* ── LOADING ── */
+.spinner {
+  display: inline-block;
+  width: 14px; height: 14px;
+  border: 2px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">IP<span>/</span>INVENTORY <span>// CONTROL PANEL</span></div>
+  <div class="status-pill" id="serverStatus">● OFFLINE</div>
+</header>
+
+<div class="layout">
+
+<!-- Sidebar -->
+<nav>
+  <div class="nav-section">Operations</div>
+  <button class="active" onclick="showPanel('pool')">
+    <svg class="icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1"/><rect x="9" y="1" width="6" height="6" rx="1"/><rect x="1" y="9" width="6" height="6" rx="1"/><rect x="9" y="9" width="6" height="6" rx="1"/></svg>
+    Add IP Pool
+  </button>
+  <button onclick="showPanel('reserve')">
+    <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2"/></svg>
+    Reserve IP
+  </button>
+  <button onclick="showPanel('assign')">
+    <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 8h9M8 5l3 3-3 3"/></svg>
+    Assign IP
+  </button>
+  <button onclick="showPanel('terminate')">
+    <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M5.5 5.5l5 5M10.5 5.5l-5 5"/></svg>
+    Terminate IP
+  </button>
+  <button onclick="showPanel('change')">
+    <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5h10M3 11h10M6 2l-3 3 3 3M10 8l3 3-3 3"/></svg>
+    Change Service
+  </button>
+
+  <div class="nav-section" style="margin-top:1rem;">Query</div>
+  <button onclick="showPanel('query')">
+    <svg class="icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6.5" cy="6.5" r="4.5"/><path d="M11 11l3 3"/></svg>
+    Query by Service
+  </button>
+</nav>
+
+<!-- Main content -->
+<main>
+
+  <!-- API base URL bar -->
+  <div class="api-bar">
+    <label>API BASE</label>
+    <input type="text" id="apiBase" value="http://localhost:8080"/>
+    <button class="btn-test" onclick="testConnection()">TEST CONNECTION</button>
+  </div>
+
+  <!-- ── PANEL: Add IP Pool ── -->
+  <div class="panel active" id="panel-pool">
+    <h2>Add IP Addresses to Pool</h2>
+    <p class="panel-desc">Insert one or more IPv4 or IPv6 addresses into the inventory. Duplicates are ignored.</p>
+
+    <div class="card">
+      <div class="card-label">POST /ip-inventory/ip-pool</div>
+
+      <div class="field">
+        <label>IP ADDRESSES</label>
+        <div class="ip-rows" id="pool-rows">
+          <div class="ip-row">
+            <input type="text" placeholder="95.44.73.19 or 2a01:..." value=""/>
+            <select>
+              <option>IPv4</option>
+              <option>IPv6</option>
+            </select>
+            <button class="btn-icon" onclick="removeRow(this, 'pool-rows')">×</button>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addRow('pool-rows', 'ip')">+ ADD ADDRESS</button>
+      </div>
+
+      <button class="btn-submit" onclick="submitPoolAdd()">SUBMIT</button>
+    </div>
+
+    <div class="response-box" id="resp-pool">
+      <div class="response-header">
+        <span class="response-status" id="resp-pool-status"></span>
+        <span style="color:var(--muted);font-family:var(--mono);font-size:0.7rem;" id="resp-pool-time"></span>
+      </div>
+      <pre class="response-body" id="resp-pool-body"></pre>
+    </div>
+  </div>
+
+  <!-- ── PANEL: Reserve IP ── -->
+  <div class="panel" id="panel-reserve">
+    <h2>Reserve IP Address</h2>
+    <p class="panel-desc">Reserve a free IP for a serviceId. Reserved IPs are auto-released if not assigned within the timeout window.</p>
+
+    <div class="card">
+      <div class="card-label">POST /ip-inventory/reserve-ip</div>
+
+      <div class="field">
+        <label>SERVICE ID</label>
+        <input type="text" id="res-serviceId" placeholder="xxxyyy"/>
+      </div>
+      <div class="field">
+        <label>IP TYPE</label>
+        <select id="res-ipType">
+          <option value="Both">Both (IPv4 + IPv6)</option>
+          <option value="IPv4">IPv4 only</option>
+          <option value="IPv6">IPv6 only</option>
+        </select>
+      </div>
+
+      <button class="btn-submit" onclick="submitReserve()">SUBMIT</button>
+    </div>
+
+    <div class="response-box" id="resp-reserve">
+      <div class="response-header">
+        <span class="response-status" id="resp-reserve-status"></span>
+        <span style="color:var(--muted);font-family:var(--mono);font-size:0.7rem;" id="resp-reserve-time"></span>
+      </div>
+      <pre class="response-body" id="resp-reserve-body"></pre>
+    </div>
+  </div>
+
+  <!-- ── PANEL: Assign IP ── -->
+  <div class="panel" id="panel-assign">
+    <h2>Assign IP to Service</h2>
+    <p class="panel-desc">Assigns listed IP addresses to the given serviceId (transitions free/reserved → assigned).</p>
+
+    <div class="card">
+      <div class="card-label">POST /ip-inventory/assign-ip-serviceId</div>
+
+      <div class="field">
+        <label>SERVICE ID</label>
+        <input type="text" id="asgn-serviceId" placeholder="xxxyyy"/>
+      </div>
+      <div class="field">
+        <label>IP ADDRESSES</label>
+        <div class="ip-rows" id="assign-rows">
+          <div class="ip-row-simple">
+            <input type="text" placeholder="95.44.73.19"/>
+            <button class="btn-icon" onclick="removeRow(this, 'assign-rows')">×</button>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addRow('assign-rows', 'ip-simple')">+ ADD ADDRESS</button>
+      </div>
+
+      <button class="btn-submit" onclick="submitAssign()">SUBMIT</button>
+    </div>
+
+    <div class="response-box" id="resp-assign">
+      <div class="response-header">
+        <span class="response-status" id="resp-assign-status"></span>
+        <span style="color:var(--muted);font-family:var(--mono);font-size:0.7rem;" id="resp-assign-time"></span>
+      </div>
+      <pre class="response-body" id="resp-assign-body"></pre>
+    </div>
+  </div>
+
+  <!-- ── PANEL: Terminate IP ── -->
+  <div class="panel" id="panel-terminate">
+    <h2>Terminate IP Assignment</h2>
+    <p class="panel-desc">Releases listed IPs from the serviceId, returning them to free status.</p>
+
+    <div class="card">
+      <div class="card-label">POST /ip-inventory/terminate-ip-serviceId</div>
+
+      <div class="field">
+        <label>SERVICE ID</label>
+        <input type="text" id="term-serviceId" placeholder="xxxyyy"/>
+      </div>
+      <div class="field">
+        <label>IP ADDRESSES</label>
+        <div class="ip-rows" id="terminate-rows">
+          <div class="ip-row-simple">
+            <input type="text" placeholder="95.44.73.19"/>
+            <button class="btn-icon" onclick="removeRow(this, 'terminate-rows')">×</button>
+          </div>
+        </div>
+        <button class="btn-add" onclick="addRow('terminate-rows', 'ip-simple')">+ ADD ADDRESS</button>
+      </div>
+
+      <button class="btn-submit" onclick="submitTerminate()">SUBMIT</button>
+    </div>
+
+    <div class="response-box" id="resp-terminate">
+      <div class="response-header">
+        <span class="response-status" id="resp-terminate-status"></span>
+        <span style="color:var(--muted);font-family:var(--mono);font-size:0.7rem;" id="resp-terminate-time"></span>
+      </div>
+      <pre class="response-body" id="resp-terminate-body"></pre>
+    </div>
+  </div>
+
+  <!-- ── PANEL: Change Service ID ── -->
+  <div class="panel" id="panel-change">
+    <h2>Change Service ID</h2>
+    <p class="panel-desc">Re-assigns all assigned IPs from one serviceId to another. Used for service migrations.</p>
+
+    <div class="card">
+      <div class="card-label">POST /ip-inventory/serviceId-change</div>
+
+      <div class="field">
+        <label>OLD SERVICE ID</label>
+        <input type="text" id="chg-oldId" placeholder="xxxyyy"/>
+      </div>
+      <div class="field">
+        <label>NEW SERVICE ID</label>
+        <input type="text" id="chg-newId" placeholder="zzzppp"/>
+      </div>
+
+      <button class="btn-submit" onclick="submitChange()">SUBMIT</button>
+    </div>
+
+    <div class="response-box" id="resp-change">
+      <div class="response-header">
+        <span class="response-status" id="resp-change-status"></span>
+        <span style="color:var(--muted);font-family:var(--mono);font-size:0.7rem;" id="resp-change-time"></span>
+      </div>
+      <pre class="response-body" id="resp-change-body"></pre>
+    </div>
+  </div>
+
+  <!-- ── PANEL: Query by Service ── -->
+  <div class="panel" id="panel-query">
+    <h2>Query by Service ID</h2>
+    <p class="panel-desc">Returns all assigned IP addresses for a given serviceId.</p>
+
+    <div class="card">
+      <div class="card-label">GET /ip-inventory/serviceId?serviceId=…</div>
+
+      <div class="field">
+        <label>SERVICE ID</label>
+        <input type="text" id="qry-serviceId" placeholder="xxxyyy"
+               onkeydown="if(event.key==='Enter') submitQuery()"/>
+      </div>
+
+      <button class="btn-submit" onclick="submitQuery()">QUERY</button>
+    </div>
+
+    <div class="response-box" id="resp-query">
+      <div class="response-header">
+        <span class="response-status" id="resp-query-status"></span>
+        <span style="color:var(--muted);font-family:var(--mono);font-size:0.7rem;" id="resp-query-time"></span>
+      </div>
+      <pre class="response-body" id="resp-query-body"></pre>
+
+      <!-- Render result as table when it has ipAddresses -->
+      <div id="resp-query-table" style="margin-top:1rem;display:none;">
+        <div class="pool-table-wrap">
+          <table>
+            <thead><tr><th>#</th><th>IP ADDRESS</th><th>TYPE</th></tr></thead>
+            <tbody id="query-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div><!-- layout -->
+
+<script>
+// ── Utilities ────────────────────────────────────────────────
+function base() {
+  return document.getElementById('apiBase').value.replace(/\/$/, '');
+}
+
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+}
+
+function addRow(containerId, type) {
+  const container = document.getElementById(containerId);
+  const div = document.createElement('div');
+  if (type === 'ip') {
+    div.className = 'ip-row';
+    div.innerHTML = `
+      <input type="text" placeholder="IP address"/>
+      <select><option>IPv4</option><option>IPv6</option></select>
+      <button class="btn-icon" onclick="removeRow(this,'${containerId}')">×</button>`;
+  } else {
+    div.className = 'ip-row-simple';
+    div.innerHTML = `
+      <input type="text" placeholder="IP address"/>
+      <button class="btn-icon" onclick="removeRow(this,'${containerId}')">×</button>`;
+  }
+  container.appendChild(div);
+}
+
+function removeRow(btn, containerId) {
+  const container = document.getElementById(containerId);
+  if (container.children.length > 1) btn.closest('div').remove();
+}
+
+function showResponse(prefix, status, data, ms) {
+  const box    = document.getElementById('resp-' + prefix);
+  const badge  = document.getElementById('resp-' + prefix + '-status');
+  const body   = document.getElementById('resp-' + prefix + '-body');
+  const time   = document.getElementById('resp-' + prefix + '-time');
+
+  box.classList.add('show');
+  badge.textContent = status >= 200 && status < 300
+    ? `HTTP ${status} OK` : `HTTP ${status} ERROR`;
+  badge.className = 'response-status ' + (status >= 200 && status < 300 ? 'ok' : 'err');
+  body.textContent = JSON.stringify(data, null, 2);
+  time.textContent = ms + ' ms';
+}
+
+async function apiCall(method, path, body, prefix) {
+  const t0 = performance.now();
+  const btn = event.currentTarget;
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>LOADING';
+
+  try {
+    const opts = { method, headers: { 'Content-Type': 'application/json' } };
+    if (body) opts.body = JSON.stringify(body);
+    const res = await fetch(base() + path, opts);
+    const json = await res.json();
+    const ms = Math.round(performance.now() - t0);
+    showResponse(prefix, res.status, json, ms);
+  } catch (err) {
+    const isCors = err.message === 'Failed to fetch' || err.message.includes('NetworkError');
+    const msg = isCors
+      ? 'Could not reach server. Check that ip_inventory is running on ' + base() + ' and CORS is enabled.'
+      : err.message;
+    showResponse(prefix, 0, { error: msg }, Math.round(performance.now() - t0));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'SUBMIT';
+  }
+}
+
+// ── Test connection ──────────────────────────────────────────
+async function testConnection() {
+  const pill = document.getElementById('serverStatus');
+  pill.textContent = '● TESTING…';
+  pill.className = 'status-pill';
+  try {
+    const r = await fetch(base() + '/ip-inventory/serviceId?serviceId=__ping__',
+                          { signal: AbortSignal.timeout(3000) });
+    pill.textContent = `● HTTP ${r.status}`;
+    pill.className = 'status-pill connected';
+  } catch {
+    pill.textContent = '● OFFLINE';
+    pill.className = 'status-pill';
+  }
+}
+
+// ── Handlers ─────────────────────────────────────────────────
+function submitPoolAdd() {
+  const rows = document.querySelectorAll('#pool-rows .ip-row');
+  const ipAddresses = [];
+  for (const row of rows) {
+    const ip     = row.querySelector('input').value.trim();
+    const ipType = row.querySelector('select').value;
+    if (ip) ipAddresses.push({ ip, ipType });
+  }
+  if (!ipAddresses.length) { alert('Enter at least one IP address'); return; }
+  apiCall('POST', '/ip-inventory/ip-pool', { ipAddresses }, 'pool');
+}
+
+function submitReserve() {
+  const serviceId = document.getElementById('res-serviceId').value.trim();
+  const ipType    = document.getElementById('res-ipType').value;
+  if (!serviceId) { alert('Enter a serviceId'); return; }
+  apiCall('POST', '/ip-inventory/reserve-ip', { serviceId, ipType }, 'reserve');
+}
+
+function submitAssign() {
+  const serviceId = document.getElementById('asgn-serviceId').value.trim();
+  if (!serviceId) { alert('Enter a serviceId'); return; }
+  const rows = document.querySelectorAll('#assign-rows .ip-row-simple');
+  const ipAddresses = [];
+  for (const row of rows) {
+    const ip = row.querySelector('input').value.trim();
+    if (ip) ipAddresses.push({ ip });
+  }
+  if (!ipAddresses.length) { alert('Enter at least one IP address'); return; }
+  apiCall('POST', '/ip-inventory/assign-ip-serviceId', { serviceId, ipAddresses }, 'assign');
+}
+
+function submitTerminate() {
+  const serviceId = document.getElementById('term-serviceId').value.trim();
+  if (!serviceId) { alert('Enter a serviceId'); return; }
+  const rows = document.querySelectorAll('#terminate-rows .ip-row-simple');
+  const ipAddresses = [];
+  for (const row of rows) {
+    const ip = row.querySelector('input').value.trim();
+    if (ip) ipAddresses.push({ ip });
+  }
+  if (!ipAddresses.length) { alert('Enter at least one IP address'); return; }
+  apiCall('POST', '/ip-inventory/terminate-ip-serviceId', { serviceId, ipAddresses }, 'terminate');
+}
+
+function submitChange() {
+  const serviceIdOld = document.getElementById('chg-oldId').value.trim();
+  const serviceId    = document.getElementById('chg-newId').value.trim();
+  if (!serviceIdOld || !serviceId) { alert('Enter both service IDs'); return; }
+  apiCall('POST', '/ip-inventory/serviceId-change', { serviceIdOld, serviceId }, 'change');
+}
+
+async function submitQuery() {
+  const serviceId = document.getElementById('qry-serviceId').value.trim();
+  if (!serviceId) { alert('Enter a serviceId'); return; }
+
+  const btn = document.querySelector('#panel-query .btn-submit');
+  const t0 = performance.now();
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>QUERYING';
+
+  try {
+    const res  = await fetch(base() + '/ip-inventory/serviceId?serviceId=' + encodeURIComponent(serviceId));
+    const json = await res.json();
+    const ms   = Math.round(performance.now() - t0);
+    showResponse('query', res.status, json, ms);
+
+    // Table
+    const tableDiv = document.getElementById('resp-query-table');
+    const tbody    = document.getElementById('query-table-body');
+    tbody.innerHTML = '';
+    if (json.ipAddresses && json.ipAddresses.length) {
+      json.ipAddresses.forEach((entry, i) => {
+        const tr = document.createElement('tr');
+        const typeClass = entry.ipType === 'IPv4' ? 'badge-v4' : 'badge-v6';
+        tr.innerHTML = `
+          <td style="color:var(--muted)">${i + 1}</td>
+          <td>${entry.ip}</td>
+          <td><span class="badge ${typeClass}">${entry.ipType}</span></td>`;
+        tbody.appendChild(tr);
+      });
+      tableDiv.style.display = 'block';
+    } else {
+      tableDiv.style.display = 'none';
+    }
+  } catch (err) {
+    showResponse('query', 0, { error: err.message }, Math.round(performance.now() - t0));
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'QUERY';
+  }
+}
+</script>
+</body>
+</html>

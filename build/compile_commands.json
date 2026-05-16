@@ -1,0 +1,116 @@
+[
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/main.cpp.o -c /home/ross/www/ip-inventory/src/main.cpp",
+  "file": "/home/ross/www/ip-inventory/src/main.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/main.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/app/AppConfig.cpp.o -c /home/ross/www/ip-inventory/src/app/AppConfig.cpp",
+  "file": "/home/ross/www/ip-inventory/src/app/AppConfig.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/app/AppConfig.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/app/Router.cpp.o -c /home/ross/www/ip-inventory/src/app/Router.cpp",
+  "file": "/home/ross/www/ip-inventory/src/app/Router.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/app/Router.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/controllers/IpPoolController.cpp.o -c /home/ross/www/ip-inventory/src/controllers/IpPoolController.cpp",
+  "file": "/home/ross/www/ip-inventory/src/controllers/IpPoolController.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/controllers/IpPoolController.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/controllers/ReserveIpController.cpp.o -c /home/ross/www/ip-inventory/src/controllers/ReserveIpController.cpp",
+  "file": "/home/ross/www/ip-inventory/src/controllers/ReserveIpController.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/controllers/ReserveIpController.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/controllers/AssignIpController.cpp.o -c /home/ross/www/ip-inventory/src/controllers/AssignIpController.cpp",
+  "file": "/home/ross/www/ip-inventory/src/controllers/AssignIpController.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/controllers/AssignIpController.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/controllers/TerminateIpController.cpp.o -c /home/ross/www/ip-inventory/src/controllers/TerminateIpController.cpp",
+  "file": "/home/ross/www/ip-inventory/src/controllers/TerminateIpController.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/controllers/TerminateIpController.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/controllers/ServiceIdChangeController.cpp.o -c /home/ross/www/ip-inventory/src/controllers/ServiceIdChangeController.cpp",
+  "file": "/home/ross/www/ip-inventory/src/controllers/ServiceIdChangeController.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/controllers/ServiceIdChangeController.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/controllers/ServiceIdQueryController.cpp.o -c /home/ross/www/ip-inventory/src/controllers/ServiceIdQueryController.cpp",
+  "file": "/home/ross/www/ip-inventory/src/controllers/ServiceIdQueryController.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/controllers/ServiceIdQueryController.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/services/IpPoolService.cpp.o -c /home/ross/www/ip-inventory/src/services/IpPoolService.cpp",
+  "file": "/home/ross/www/ip-inventory/src/services/IpPoolService.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/services/IpPoolService.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/services/ReserveIpService.cpp.o -c /home/ross/www/ip-inventory/src/services/ReserveIpService.cpp",
+  "file": "/home/ross/www/ip-inventory/src/services/ReserveIpService.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/services/ReserveIpService.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/services/AssignIpService.cpp.o -c /home/ross/www/ip-inventory/src/services/AssignIpService.cpp",
+  "file": "/home/ross/www/ip-inventory/src/services/AssignIpService.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/services/AssignIpService.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/services/TerminateIpService.cpp.o -c /home/ross/www/ip-inventory/src/services/TerminateIpService.cpp",
+  "file": "/home/ross/www/ip-inventory/src/services/TerminateIpService.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/services/TerminateIpService.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/services/ServiceIdChangeService.cpp.o -c /home/ross/www/ip-inventory/src/services/ServiceIdChangeService.cpp",
+  "file": "/home/ross/www/ip-inventory/src/services/ServiceIdChangeService.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/services/ServiceIdChangeService.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/services/ServiceIdQueryService.cpp.o -c /home/ross/www/ip-inventory/src/services/ServiceIdQueryService.cpp",
+  "file": "/home/ross/www/ip-inventory/src/services/ServiceIdQueryService.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/services/ServiceIdQueryService.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/services/ReservationExpiryJob.cpp.o -c /home/ross/www/ip-inventory/src/services/ReservationExpiryJob.cpp",
+  "file": "/home/ross/www/ip-inventory/src/services/ReservationExpiryJob.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/services/ReservationExpiryJob.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/repository/IpRepository.cpp.o -c /home/ross/www/ip-inventory/src/repository/IpRepository.cpp",
+  "file": "/home/ross/www/ip-inventory/src/repository/IpRepository.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/repository/IpRepository.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/utils/IpUtils.cpp.o -c /home/ross/www/ip-inventory/src/utils/IpUtils.cpp",
+  "file": "/home/ross/www/ip-inventory/src/utils/IpUtils.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/utils/IpUtils.cpp.o"
+},
+{
+  "directory": "/home/ross/www/ip-inventory/build",
+  "command": "/usr/bin/c++  -I/home/ross/www/ip-inventory/include -isystem /usr/include/jsoncpp -g -O0 -Wall -Wextra -std=c++20 -o CMakeFiles/ip_inventory.dir/src/utils/JsonValidator.cpp.o -c /home/ross/www/ip-inventory/src/utils/JsonValidator.cpp",
+  "file": "/home/ross/www/ip-inventory/src/utils/JsonValidator.cpp",
+  "output": "CMakeFiles/ip_inventory.dir/src/utils/JsonValidator.cpp.o"
+}
+]

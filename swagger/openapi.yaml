@@ -1,0 +1,370 @@
+openapi: "3.0.3"
+info:
+  title: IP Inventory API
+  description: |
+    REST API for managing an IP address inventory pool.
+    Supports adding, reserving, assigning, terminating, and querying IPv4/IPv6 addresses per service.
+  version: "1.0.0"
+  contact:
+    name: IP Inventory Team
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+tags:
+  - name: IP Pool
+    description: Manage the inventory pool of IP addresses
+  - name: Reservation
+    description: Reserve and assign IP addresses to services
+  - name: Service Management
+    description: Query and manage service-to-IP associations
+
+# ─────────────────────────────────────────────────────────────
+paths:
+
+  /ip-inventory/ip-pool:
+    post:
+      tags: [IP Pool]
+      summary: Add IP addresses to the inventory pool
+      description: |
+        Inserts one or more IPv4 or IPv6 addresses into the IP inventory pool
+        with status **free**. Duplicate addresses are silently ignored.
+      operationId: addIpPool
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IpPoolRequest'
+            example:
+              ipAddresses:
+                - ip: "95.44.73.19"
+                  ipType: "IPv4"
+                - ip: "2a01:05a9:01a4:095c:0000:0000:0000:0001"
+                  ipType: "IPv6"
+                - ip: "95.44.73.18"
+                  ipType: "IPv4"
+      responses:
+        "200":
+          $ref: '#/components/responses/StatusOk'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /ip-inventory/reserve-ip:
+    post:
+      tags: [Reservation]
+      summary: Reserve an IP address for a service
+      description: |
+        Atomically reserves one (or two when `ipType=Both`) free IP addresses
+        for the given `serviceId`.  
+        - If the serviceId already has a reservation of the requested type, the
+          existing address is returned without creating a new reservation.  
+        - Reserved IPs are automatically released back to **free** if
+          `assign-ip-serviceId` is not called within the configured timeout
+          (default 300 s).
+      operationId: reserveIp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReserveIpRequest'
+            example:
+              serviceId: "xxxyyy"
+              ipType: "Both"
+      responses:
+        "200":
+          description: Reserved IP address(es)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpAddressesResponse'
+              example:
+                ipAddresses:
+                  - ip: "95.44.73.19"
+                    ipType: "IPv4"
+                  - ip: "2a01:05a9:01a4:095c::1"
+                    ipType: "IPv6"
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /ip-inventory/assign-ip-serviceId:
+    post:
+      tags: [Reservation]
+      summary: Assign IP address(es) to a service
+      description: |
+        Transitions the listed IP addresses from **free** or **reserved** →
+        **assigned**, binding them to the given `serviceId`.
+        All addresses must be available; if any is already assigned to another
+        service, the entire request is rejected with HTTP 409.
+      operationId: assignIp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IpListRequest'
+            example:
+              serviceId: "xxxyyy"
+              ipAddresses:
+                - ip: "95.44.73.19"
+                - ip: "2a01:05a9:01a4:095c::1"
+      responses:
+        "200":
+          $ref: '#/components/responses/StatusOk'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /ip-inventory/terminate-ip-serviceId:
+    post:
+      tags: [Service Management]
+      summary: Terminate IP assignment for a service
+      description: |
+        Releases the listed IP addresses from the given `serviceId`, returning
+        them to status **free**. All addresses must currently be **assigned**
+        to the specified service.
+      operationId: terminateIp
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/IpListRequest'
+            example:
+              serviceId: "xxxyyy"
+              ipAddresses:
+                - ip: "95.44.73.19"
+                - ip: "2a01:05a9:01a4:095c::1"
+      responses:
+        "200":
+          $ref: '#/components/responses/StatusOk'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "409":
+          $ref: '#/components/responses/Conflict'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /ip-inventory/serviceId-change:
+    post:
+      tags: [Service Management]
+      summary: Reassign all IPs from one service to another
+      description: |
+        Atomically re-assigns all **assigned** IP addresses from `serviceIdOld`
+        to `serviceId`. Useful for service migrations or renames.
+        Returns 404 if `serviceIdOld` has no assigned addresses.
+      operationId: changeServiceId
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ServiceIdChangeRequest'
+            example:
+              serviceIdOld: "xxxyyy"
+              serviceId: "zzzppp"
+      responses:
+        "200":
+          $ref: '#/components/responses/StatusOk'
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "404":
+          $ref: '#/components/responses/NotFound'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+  /ip-inventory/serviceId:
+    get:
+      tags: [Service Management]
+      summary: Get IP addresses assigned to a service
+      description: |
+        Returns all **assigned** IP addresses for the given `serviceId`.
+        Returns an empty `ipAddresses` array if the service has no assigned IPs
+        (not an error).
+      operationId: getByServiceId
+      parameters:
+        - name: serviceId
+          in: query
+          required: true
+          schema:
+            type: string
+          description: The service identifier to look up
+          example: "xxxyyy"
+      responses:
+        "200":
+          description: IP addresses currently assigned to the service
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IpAddressesResponse'
+              example:
+                ipAddresses:
+                  - ip: "95.44.73.19"
+                    ipType: "IPv4"
+                  - ip: "2a01:05a9:01a4:095c::1"
+                    ipType: "IPv6"
+        "400":
+          $ref: '#/components/responses/BadRequest'
+        "500":
+          $ref: '#/components/responses/InternalError'
+
+# ─────────────────────────────────────────────────────────────
+components:
+  schemas:
+
+    IpEntry:
+      type: object
+      required: [ip, ipType]
+      properties:
+        ip:
+          type: string
+          description: IP address (IPv4 or IPv6)
+          example: "95.44.73.19"
+        ipType:
+          type: string
+          enum: [IPv4, IPv6]
+          description: IP address family
+          example: "IPv4"
+
+    IpEntryNoType:
+      type: object
+      required: [ip]
+      properties:
+        ip:
+          type: string
+          description: IP address (IPv4 or IPv6)
+          example: "95.44.73.19"
+
+    IpPoolRequest:
+      type: object
+      required: [ipAddresses]
+      properties:
+        ipAddresses:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/IpEntry'
+
+    ReserveIpRequest:
+      type: object
+      required: [serviceId, ipType]
+      properties:
+        serviceId:
+          type: string
+          description: Unique service identifier
+          example: "xxxyyy"
+        ipType:
+          type: string
+          enum: [IPv4, IPv6, Both]
+          description: |
+            The address family to reserve.  
+            `Both` reserves one IPv4 **and** one IPv6 address.
+          example: "Both"
+
+    IpListRequest:
+      type: object
+      required: [serviceId, ipAddresses]
+      properties:
+        serviceId:
+          type: string
+          description: Unique service identifier
+          example: "xxxyyy"
+        ipAddresses:
+          type: array
+          minItems: 1
+          items:
+            $ref: '#/components/schemas/IpEntryNoType'
+
+    ServiceIdChangeRequest:
+      type: object
+      required: [serviceIdOld, serviceId]
+      properties:
+        serviceIdOld:
+          type: string
+          description: Current service identifier
+          example: "xxxyyy"
+        serviceId:
+          type: string
+          description: New service identifier
+          example: "zzzppp"
+
+    IpAddressesResponse:
+      type: object
+      properties:
+        ipAddresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/IpEntry'
+
+    StatusResponse:
+      type: object
+      properties:
+        statusCode:
+          type: string
+          description: "0 = success, non-zero = error"
+          example: "0"
+        statusMessage:
+          type: string
+          example: "Successful operation. OK"
+
+  responses:
+    StatusOk:
+      description: Operation completed successfully
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResponse'
+          example:
+            statusCode: "0"
+            statusMessage: "Successful operation. OK"
+
+    BadRequest:
+      description: Invalid request body or parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResponse'
+          example:
+            statusCode: "400"
+            statusMessage: "Missing field: serviceId"
+
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResponse'
+          example:
+            statusCode: "404"
+            statusMessage: "No assigned IPs found for serviceId: xxxyyy"
+
+    Conflict:
+      description: Conflict — resource state does not allow the operation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResponse'
+          example:
+            statusCode: "409"
+            statusMessage: "One or more IPs are not available for assignment"
+
+    InternalError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/StatusResponse'
+          example:
+            statusCode: "500"
+            statusMessage: "Internal server error"
