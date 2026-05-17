@@ -1,6 +1,6 @@
 # IP Inventory REST API
 
-An IP address inventory management API built with **C++20**, **Drogon framework**, and **PostgreSQL** on **Debian 13 OS**
+An IP address inventory management API built with **C++20**, **Drogon framework**, and **PostgreSQL**
 
 ---
 
@@ -41,7 +41,7 @@ ip-inventory/
 
 ---
 
-## Quick Start (Debian 13)
+## Quick Start
 
 ### 1. Install dependencies and build
 
@@ -73,8 +73,14 @@ Edit `config/config.json` — update the `db_clients` section with your PostgreS
 
 ### 4. Run
 
+go to build/ folder
+
+run
+
 ```bash
-./build/ip_inventory
+cmake ..
+make
+./ip-inventory
 ```
 
 ### 5. Open the GUI

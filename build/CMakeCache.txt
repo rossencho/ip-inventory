@@ -453,9 +453,9 @@ FIND_PACKAGE_MESSAGE_DETAILS_Jsoncpp:INTERNAL=[/usr/include/jsoncpp][/usr/lib/x8
 //Details about finding MySQL
 FIND_PACKAGE_MESSAGE_DETAILS_MySQL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libmysqlclient_r.so][/usr/include/mariadb][v()]
 //Details about finding OpenSSL
-FIND_PACKAGE_MESSAGE_DETAILS_OpenSSL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libcrypto.so][/usr/include][c ][v3.5.5()]
+FIND_PACKAGE_MESSAGE_DETAILS_OpenSSL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libcrypto.so][/usr/include][c ][v3.5.6()]
 //Details about finding PostgreSQL
-FIND_PACKAGE_MESSAGE_DETAILS_PostgreSQL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libpq.so][/usr/include/postgresql][c ][v17.9()]
+FIND_PACKAGE_MESSAGE_DETAILS_PostgreSQL:INTERNAL=[/usr/lib/x86_64-linux-gnu/libpq.so][/usr/include/postgresql][c ][v17.10()]
 //Details about finding Threads
 FIND_PACKAGE_MESSAGE_DETAILS_Threads:INTERNAL=[TRUE][v()]
 //Details about finding ZLIB
